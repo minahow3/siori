@@ -1,1 +1,15 @@
 
+フロントエンド：Nexy.js
+バックエンド：Node.js
+データベース：PostgreSQL
+Docker を使用してコンテナ化
+
+siori/
+├── frontend/               # Next.js アプリケーション
+├── backend/                # Node.js バックエンド
+│   ├── Dockerfile           # Node.js バックエンド用の Dockerfile
+│   ├── package.json         # Node.js バックエンドの依存関係など
+│   ├── index.js             # API サーバー
+│   └── database.sql         # 初期データを挿入する SQL スクリプト
+├── docker-compose.yml       # Docker コンテナの構成
+└── README.md                # プロジェクトの説明
