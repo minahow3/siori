@@ -1,24 +1,36 @@
-'use server'
+'use server';
 
-import { contactFormSchema } from '@/lib/schema'
-import { z } from 'zod'
+import { contactFormSchema } from '@/lib/schema';
+import { z } from 'zod';
 
-export async function contactFormAction(
-  _prevState,
-  formData
-) {
+export async function contactFormAction(_prevState, formData) {
+  console.log('Backend API URL:', process.env.NEXT_PUBLIC_BACKEND_API_URL);  // 環境変数の値をログに表示
   const defaultValues = z
     .record(z.string(), z.string())
-    .parse(Object.fromEntries(formData.entries()))
+    .parse(Object.fromEntries(formData.entries()));
+
+  const api_url = process.env.NEXT_PUBLIC_BACKEND_API_URL;
 
   try {
-    const data = contactFormSchema.parse(Object.fromEntries(formData))
+    // フォームデータをスキーマに従って検証
+    const data = contactFormSchema.parse(Object.fromEntries(formData));
 
-    // This simulates a slow response like a form submission.
-    // Replace this with your actual form submission logic.
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    // 実際のAPIエンドポイントにデータを送信
+    const response = await fetch(`${api_url}/api/contact`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
 
-    console.log(data)
+    // APIが成功レスポンスを返さなかった場合
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Failed to submit the form');
+    }
+
+    console.log('Form submitted successfully:', data);
 
     return {
       defaultValues: {
@@ -28,24 +40,27 @@ export async function contactFormAction(
       },
       success: true,
       errors: null,
-    }
+    };
   } catch (error) {
+    console.error('Error submitting form:', error);
+
     if (error instanceof z.ZodError) {
       return {
         defaultValues,
         success: false,
-        errors: Object.fromEntries(Object.entries(error.flatten().fieldErrors).map(([key, value]) => [
-          key,
-          value?.join(', '),
-        ])),
+        errors: Object.fromEntries(
+          Object.entries(error.flatten().fieldErrors).map(([key, value]) => [
+            key,
+            value?.join(', '),
+          ])
+        ),
       };
     }
 
     return {
       defaultValues,
       success: false,
-      errors: null,
-    }
+      errors: { global: error.message || 'Unknown error occurred' },
+    };
   }
 }
-

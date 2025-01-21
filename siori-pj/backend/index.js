@@ -33,8 +33,13 @@ app.get('/api/contact/:id', async (req, res) => {
       res.status(404).json({ error: 'Contact not found' });
     }
   });
+  
 
 // サーバーの起動
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+// app.listen(PORT, () => {
+//   console.log(`Server running on http://localhost:${PORT}`);
+// });
+
+app.listen(5000, '0.0.0.0', () => {
+  console.log('Server running on port 5000');
 });
